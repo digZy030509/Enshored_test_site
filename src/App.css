@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  max-width: 100vw;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  background-color: #000000; /* Keeps layout color consistent if elements shift */
+}
