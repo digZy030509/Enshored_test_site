@@ -63,7 +63,7 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-black/60" />
 
       {/* Main Content Wrapper */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center pt-24 pb-12">
+      <div className="relative z-10 min-h-screen flex items-center justify-center pt-24 pb-24 mt-[150px] ">
         <div className="max-w-5xl text-center px-6 mx-auto">
           <h1 className="text-white font-bold leading-tight text-4xl sm:text-5xl md:text-6xl lg:text-8xl">
             Lorem ipsum

@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import FacebookIcon from "../assets/images/Facebook Icon.webp";
+import InstagramIcon from "../assets/images/Instagram Icon.webp";
 
 const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -20,7 +22,24 @@ const Footer = () => {
     setNewsletterEmail("");
     setSubscribeStatus("success");
   };
-
+  const navLinks = [
+    {
+      name: "About",
+      link: "https://www.enshored.com/about/",
+    },
+    {
+      name: "Services",
+      link: "https://www.enshored.com/solutions/",
+    },
+    {
+      name: "Work",
+      link: "https://www.enshored.com/expertise/",
+    },
+    {
+      name: "Careers",
+      link: "https://www.enshored.com/careers/",
+    },
+  ];
   return (
     <footer className="bg-black text-white py-16 px-6 md:px-16 font-sans">
       <div className="max-w-7xl mx-auto">
@@ -42,9 +61,7 @@ const Footer = () => {
                 className="w-10 h-10 bg-[#E53935] rounded-full flex items-center justify-center text-white hover:bg-[#d32f2f] transition-colors"
                 aria-label="Facebook"
               >
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                  <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.8z" />
-                </svg>
+                <img src={FacebookIcon} alt="Facebook" />
               </a>
 
               {/* Instagram Button */}
@@ -55,16 +72,7 @@ const Footer = () => {
                 className="w-10 h-10 bg-[#E53935] rounded-full flex items-center justify-center text-white hover:bg-[#d32f2f] transition-colors"
                 aria-label="Instagram"
               >
-                <svg
-                  className="w-5 h-5 stroke-current fill-none stroke-[2]"
-                  viewBox="0 0 24 24"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                </svg>
+                <img src={InstagramIcon} alt="Instagram" />
               </a>
             </div>
 
@@ -81,32 +89,16 @@ const Footer = () => {
               Quick Links
             </h4>
             <ul className="space-y-3 text-sm text-gray-300">
-              <li>
-                <a href="#about" className="hover:text-white transition-colors">
-                  About us
-                </a>
-              </li>
-              <li>
-                <a href="#work" className="hover:text-white transition-colors">
-                  Work
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#careers"
-                  className="hover:text-white transition-colors"
-                >
-                  Careers
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#contact"
-                  className="hover:text-white transition-colors"
-                >
-                  Contact Us
-                </a>
-              </li>
+              {navLinks.map((nav, index) => (
+                <li key={index}>
+                  <a
+                    href={nav.link}
+                    className="hover:text-white transition-colors"
+                  >
+                    {nav.name}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
