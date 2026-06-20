@@ -1,13 +1,16 @@
 import React, { useState } from "react";
+import emailjs from "@emailjs/browser";
 import FacebookIcon from "../assets/images/Facebook Icon.webp";
 import InstagramIcon from "../assets/images/Instagram Icon.webp";
 
 const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [subscribeStatus, setSubscribeStatus] = useState(null); // 'success' | 'error' | null
+  const [subscribeStatus, setSubscribeStatus] = useState(null); // 'success' | 'error' | 'loading' | null
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
+
+    // Email Validation
     if (
       !newsletterEmail.trim() ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newsletterEmail)
@@ -16,12 +19,29 @@ const Footer = () => {
       return;
     }
 
-    // --- INTEGRATION PLACEHOLDER ---
-    // You can hook this up to your EmailJS service or newsletter provider (e.g., Mailchimp)
-    console.log(`Subscribed email: ${newsletterEmail}`);
-    setNewsletterEmail("");
-    setSubscribeStatus("success");
+    setSubscribeStatus("loading");
+
+    // Dynamic variable for your EmailJS template (e.g., {{subscriber_email}})
+    const templateParams = {
+      subscriber_email: newsletterEmail,
+    };
+
+    try {
+      await emailjs.send(
+        "service_j8fez0s",
+        "template_ott1fxw",
+        templateParams,
+        "CbN2DrkluPqVc_9iF",
+      );
+
+      setNewsletterEmail("");
+      setSubscribeStatus("success");
+    } catch (error) {
+      console.error("EmailJS Error:", error);
+      setSubscribeStatus("error");
+    }
   };
+
   const navLinks = [
     {
       name: "About",
@@ -40,6 +60,7 @@ const Footer = () => {
       link: "https://www.enshored.com/careers/",
     },
   ];
+
   return (
     <footer className="bg-black text-white py-16 px-6 md:px-16 font-sans">
       <div className="max-w-7xl mx-auto">
@@ -136,6 +157,7 @@ const Footer = () => {
                   type="email"
                   placeholder="Email Address"
                   value={newsletterEmail}
+                  disabled={subscribeStatus === "loading"}
                   onChange={(e) => {
                     setNewsletterEmail(e.target.value);
                     if (subscribeStatus) setSubscribeStatus(null);
@@ -144,18 +166,19 @@ const Footer = () => {
                     subscribeStatus === "error"
                       ? "border-red-500"
                       : "border-gray-800 focus:border-gray-600"
-                  }`}
+                  } disabled:opacity-50`}
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-[#E53935] text-white py-3 px-6 rounded font-bold text-sm hover:bg-[#d32f2f] transition-all tracking-wide cursor-pointer"
+                disabled={subscribeStatus === "loading"}
+                className="w-full bg-[#E53935] text-white py-3 px-6 rounded font-bold text-sm hover:bg-[#d32f2f] transition-all tracking-wide cursor-pointer disabled:bg-gray-700 disabled:cursor-not-allowed"
               >
-                Submit
+                {subscribeStatus === "loading" ? "Submitting..." : "Submit"}
               </button>
 
-              {/* Mini Status Hints */}
+              {/* Status Notifications */}
               {subscribeStatus === "success" && (
                 <p className="text-green-500 text-xs mt-1">
                   ✓ Successfully subscribed!
@@ -163,7 +186,7 @@ const Footer = () => {
               )}
               {subscribeStatus === "error" && (
                 <p className="text-red-500 text-xs mt-1">
-                  Please enter a valid email.
+                  Please enter a valid email address.
                 </p>
               )}
             </form>

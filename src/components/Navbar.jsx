@@ -1,23 +1,22 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import emailjs from "@emailjs/browser"; // 1. Import EmailJS
 import Button from "./Button";
 import Container from "./Container";
 import logo from "../assets/images/Enshored Logo.webp";
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false); // Mobile Menu Drawer state
-  const [isModalOpen, setIsModalOpen] = useState(false); // Pop-up Form state
+  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Form input field state
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
   });
 
-  // Submission feedback states
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null); // 'success' | 'error'
+  const [submitStatus, setSubmitStatus] = useState(null);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -28,24 +27,38 @@ const Navbar = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // 2. Updated Form Submit Handler with EmailJS
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
 
+    // Dynamic key mapping based on what your EmailJS Template expects
+    const templateParams = {
+      from_name: formData.name,
+      reply_to: formData.email,
+      message: formData.message,
+    };
+
     try {
-      // Simulate API submission processing delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Send the email using your credentials
+      await emailjs.send(
+        "service_j8fez0s", // Replace with your EmailJS Service ID
+        "template_ott1fxw", // Replace with your EmailJS Template ID
+        templateParams,
+        "CbN2DrkluPqVc_9iF", // Replace with your EmailJS Public Key
+      );
 
       setSubmitStatus("success");
       setFormData({ name: "", email: "", message: "" }); // Clear input data
 
-      // Close out the modal smoothly after success validation
+      // Close the modal smoothly after a success message
       setTimeout(() => {
         setIsModalOpen(false);
         setSubmitStatus(null);
       }, 2000);
     } catch (error) {
+      console.error("EmailJS Error:", error);
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
@@ -53,41 +66,20 @@ const Navbar = () => {
   };
 
   const handleMobileQuoteClick = () => {
-    setIsOpen(false); // Step 1: Slide out the mobile drawer menu
-    setIsModalOpen(true); // Step 2: Render the modal overlay popup
+    setIsOpen(false);
+    setIsModalOpen(true);
   };
 
   const navLinks = [
-    {
-      name: "About",
-      link: "https://www.enshored.com/about/",
-    },
-    {
-      name: "Services",
-      link: "https://www.enshored.com/solutions/",
-    },
-    {
-      name: "Work",
-      link: "https://www.enshored.com/expertise/",
-    },
-    {
-      name: "Careers",
-      link: "https://www.enshored.com/careers/",
-    },
+    { name: "About", link: "https://www.enshored.com/about/" },
+    { name: "Services", link: "https://www.enshored.com/solutions/" },
+    { name: "Work", link: "https://www.enshored.com/expertise/" },
+    { name: "Careers", link: "https://www.enshored.com/careers/" },
   ];
 
   return (
     <>
-      <header
-        className="
-          absolute
-          top-0
-          left-0
-          right-0
-          z-50
-          border-b border-gray-500/20
-        "
-      >
+      <header className="absolute top-0 left-0 right-0 z-50 border-b border-gray-500/20">
         <Container>
           <nav className="h-24 flex items-center justify-between">
             {/* Logo */}
@@ -130,13 +122,11 @@ const Navbar = () => {
 
             {/* Mobile Overlay Menu Drawer */}
             <div
-              className={`
-                fixed inset-0 bg-black/95 transition-transform duration-300 ease-in-out z-40 md:hidden
-                ${isOpen ? "translate-x-0" : "translate-x-full"}
-              `}
+              className={`fixed inset-0 bg-black/95 transition-transform duration-300 ease-in-out z-40 md:hidden ${
+                isOpen ? "translate-x-0" : "translate-x-full"
+              }`}
             >
               <div className="h-full w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-between pt-32 pb-16">
-                {/* Navigation Links */}
                 <ul className="flex flex-col items-end gap-6 text-white text-xl font-semibold tracking-wide pr-2">
                   {navLinks.map((link) => (
                     <li
@@ -153,8 +143,6 @@ const Navbar = () => {
                       </a>
                     </li>
                   ))}
-
-                  {/* Mobile Trigger Button inside the navigation column container */}
                   <div
                     className="flex justify-end pr-2 mt-4"
                     onClick={handleMobileQuoteClick}
@@ -171,15 +159,12 @@ const Navbar = () => {
       {/* --- SHARED RESPONSIVE POP-UP MODAL --- */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Dismissible Translucent Backdrop Blurring Background Details */}
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
             onClick={() => setIsModalOpen(false)}
           />
 
-          {/* Form Content Wrapper */}
           <div className="relative w-full max-w-md bg-white rounded-2xl p-6 sm:p-8 shadow-2xl z-10 border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
-            {/* Close Icon Element */}
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1"
@@ -258,12 +243,12 @@ const Navbar = () => {
 
               {/* Submission Status Alerters */}
               {submitStatus === "success" && (
-                <div className="p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl animate-fade-in">
+                <div className="p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl">
                   ✓ Form submitted successfully!
                 </div>
               )}
               {submitStatus === "error" && (
-                <div className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl animate-fade-in">
+                <div className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl">
                   ✕ Something went wrong. Please try again.
                 </div>
               )}

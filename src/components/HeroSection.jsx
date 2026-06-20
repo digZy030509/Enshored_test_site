@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { X } from "lucide-react"; // Install via 'npm i lucide-react' if you haven't already
+import { X } from "lucide-react";
+import emailjs from "@emailjs/browser"; // Make sure to keep this imported
 import HeroImg from "../assets/images/Hero BG.webp";
 import Button from "./Button";
 import Women from "../assets/images/women.png";
@@ -18,7 +19,7 @@ const HeroSection = () => {
 
   // Submission Status States
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null); // 'success' or 'error'
+  const [submitStatus, setSubmitStatus] = useState(null); // 'success' | 'error' | null
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -30,20 +31,31 @@ const HeroSection = () => {
     setIsSubmitting(true);
     setSubmitStatus(null);
 
+    // Map your form fields to match the template variables in your EmailJS dashboard
+    const templateParams = {
+      from_name: formData.name,
+      reply_to: formData.email,
+      message_details: formData.message,
+    };
+
     try {
-      // Simulate API Endpoint Post Action (Replace with your actual endpoint URL)
-      // await axios.post('/api/contact', formData);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await emailjs.send(
+        "service_j8fez0s",
+        "template_ott1fxw", // Note: If you want a different email layout for quotes than your newsletter, update this ID!
+        templateParams,
+        "CbN2DrkluPqVc_9iF",
+      );
 
       setSubmitStatus("success");
-      setFormData({ name: "", email: "", message: "" }); // Reset inputs
+      setFormData({ name: "", email: "", message: "" }); // Clear inputs on success
 
-      // Auto-close modal shortly after success feedback
+      // Auto-close modal after success feedback
       setTimeout(() => {
         setIsModalOpen(false);
         setSubmitStatus(null);
       }, 2000);
     } catch (error) {
+      console.error("EmailJS Form Error:", error);
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
@@ -108,7 +120,7 @@ const HeroSection = () => {
           {/* Dark Backdrop Shadow Layer */}
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsModalOpen(false)}
+            onClick={() => !isSubmitting && setIsModalOpen(false)} // Prevent closing background clicks while loading
           />
 
           {/* Form Modal Box Wrapper */}
@@ -116,7 +128,8 @@ const HeroSection = () => {
             {/* Close Button Icon */}
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1"
+              disabled={isSubmitting}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Close form"
             >
               <X size={24} />
@@ -145,10 +158,11 @@ const HeroSection = () => {
                   id="modal-name"
                   name="name"
                   required
+                  disabled={isSubmitting}
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="John Doe"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-[#FF2020] focus:bg-white transition-all text-sm"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-[#FF2020] focus:bg-white transition-all text-sm disabled:opacity-60"
                 />
               </div>
 
@@ -165,10 +179,11 @@ const HeroSection = () => {
                   id="modal-email"
                   name="email"
                   required
+                  disabled={isSubmitting}
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="johndoe@example.com"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-[#FF2020] focus:bg-white transition-all text-sm"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-[#FF2020] focus:bg-white transition-all text-sm disabled:opacity-60"
                 />
               </div>
 
@@ -185,10 +200,11 @@ const HeroSection = () => {
                   name="message"
                   required
                   rows="4"
+                  disabled={isSubmitting}
                   value={formData.message}
                   onChange={handleInputChange}
                   placeholder="Tell us about your project requirements..."
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-[#FF2020] focus:bg-white transition-all text-sm resize-none"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-[#FF2020] focus:bg-white transition-all text-sm resize-none disabled:opacity-60"
                 />
               </div>
 
@@ -208,7 +224,7 @@ const HeroSection = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || submitStatus === "success"}
-                className="w-full bg-[#FF2020] hover:bg-red-600 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-xl transition-colors duration-300 shadow-md cursor-pointer text-sm mt-2"
+                className="w-full bg-[#FF2020] hover:bg-red-600 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-xl transition-colors duration-300 shadow-md cursor-pointer text-sm mt-2 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? "Sending Request..." : "Submit Request"}
               </button>

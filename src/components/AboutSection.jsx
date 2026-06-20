@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import emailjs from "@emailjs/browser"; // Integrated EmailJS SDK
 import aboutImg from "../assets/images/About Us.webp";
 
 const AboutSection = () => {
@@ -36,12 +37,18 @@ const AboutSection = () => {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // Form verification logic
+  // Form verification and EmailJS submission logic
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const currentErrors = {};
+
+    // Standard client side validation validation rules
     if (!formData.name.trim()) currentErrors.name = "Name is required";
-    if (!formData.email.trim()) currentErrors.email = "Email is required";
+    if (!formData.email.trim()) {
+      currentErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      currentErrors.email = "Please enter a valid email address";
+    }
 
     if (Object.keys(currentErrors).length > 0) {
       setErrors(currentErrors);
@@ -49,17 +56,36 @@ const AboutSection = () => {
     }
 
     setIsSubmitting(true);
-    // Simulate API Network Delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
-    setSubmitSuccess(true);
-    setFormData({ name: "", email: "", message: "" });
 
-    // Automatically close modal shortly after success
-    setTimeout(() => {
-      setIsModalOpen(false);
-      setSubmitSuccess(false);
-    }, 2000);
+    // Map your form state fields to standard dynamic keys used in EmailJS templates
+    const templateParams = {
+      from_name: formData.name,
+      reply_to: formData.email,
+      message_details: formData.message || "No message provided.",
+    };
+
+    try {
+      await emailjs.send(
+        "service_j8fez0s",
+        "template_ott1fxw",
+        templateParams,
+        "CbN2DrkluPqVc_9iF",
+      );
+
+      setSubmitSuccess(true);
+      setFormData({ name: "", email: "", message: "" });
+
+      // Automatically close modal shortly after success feedback
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setSubmitSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error("EmailJS Form Error inside AboutSection:", error);
+      setErrors({ global: "Something went wrong. Please try again later." });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -168,7 +194,7 @@ const AboutSection = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => !isSubmitting && setIsModalOpen(false)}
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             />
 
@@ -191,7 +217,8 @@ const AboutSection = () => {
               {/* Close Button Cross Symbol */}
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors p-1 cursor-pointer"
+                disabled={isSubmitting}
+                className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors p-1 cursor-pointer disabled:opacity-50"
                 aria-label="Close modal"
               >
                 <svg
@@ -235,6 +262,13 @@ const AboutSection = () => {
                   className="space-y-4"
                   noValidate
                 >
+                  {/* Global API Submission Errors */}
+                  {errors.global && (
+                    <div className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl">
+                      ✕ {errors.global}
+                    </div>
+                  )}
+
                   <div>
                     <label
                       htmlFor="modal-name"
@@ -246,9 +280,14 @@ const AboutSection = () => {
                       type="text"
                       id="modal-name"
                       name="name"
+                      disabled={isSubmitting}
                       value={formData.name}
                       onChange={handleInputChange}
-                      className={`w-full p-3 border rounded-xl text-sm outline-none transition-all ${errors.name ? "border-red-500 bg-red-50/20" : "border-gray-200 focus:border-gray-400"}`}
+                      className={`w-full p-3 border rounded-xl text-sm outline-none transition-all ${
+                        errors.name
+                          ? "border-red-500 bg-red-50/20"
+                          : "border-gray-200 focus:border-gray-400"
+                      } disabled:opacity-60`}
                     />
                     {errors.name && (
                       <p className="text-red-500 text-xs mt-1">{errors.name}</p>
@@ -266,9 +305,14 @@ const AboutSection = () => {
                       type="email"
                       id="modal-email"
                       name="email"
+                      disabled={isSubmitting}
                       value={formData.email}
                       onChange={handleInputChange}
-                      className={`w-full p-3 border rounded-xl text-sm outline-none transition-all ${errors.email ? "border-red-500 bg-red-50/20" : "border-gray-200 focus:border-gray-400"}`}
+                      className={`w-full p-3 border rounded-xl text-sm outline-none transition-all ${
+                        errors.email
+                          ? "border-red-500 bg-red-50/20"
+                          : "border-gray-200 focus:border-gray-400"
+                      } disabled:opacity-60`}
                     />
                     {errors.email && (
                       <p className="text-red-500 text-xs mt-1">
@@ -288,9 +332,10 @@ const AboutSection = () => {
                       id="modal-message"
                       name="message"
                       rows="3"
+                      disabled={isSubmitting}
                       value={formData.message}
                       onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-400 resize-none transition-all"
+                      className="w-full p-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-400 resize-none transition-all disabled:opacity-60"
                     />
                   </div>
 

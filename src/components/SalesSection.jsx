@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import emailjs from "@emailjs/browser"; // Integrated EmailJS SDK
 import ImgSection from "../assets/images/Sales & Installation.webp";
 import SalesImg1 from "../assets/images/Sales & Installation - Icon 1.webp";
 import SalesImg2 from "../assets/images/Sales & Installation - Icon 2.webp";
@@ -58,12 +59,18 @@ const SalesSection = () => {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // Handle Form Submission Validation
+  // Handle Form Submission Validation and EmailJS Dispatch
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const currentErrors = {};
+
+    // Standard client side validation validation rules
     if (!formData.name.trim()) currentErrors.name = "Name is required";
-    if (!formData.email.trim()) currentErrors.email = "Email is required";
+    if (!formData.email.trim()) {
+      currentErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      currentErrors.email = "Please enter a valid email address";
+    }
 
     if (Object.keys(currentErrors).length > 0) {
       setErrors(currentErrors);
@@ -71,17 +78,38 @@ const SalesSection = () => {
     }
 
     setIsSubmitting(true);
-    // Simulate Network Request Delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
-    setSubmitSuccess(true);
-    setFormData({ name: "", email: "", message: "" });
 
-    // Automatically dismiss modal shorty after completion notice
-    setTimeout(() => {
-      setIsModalOpen(false);
-      setSubmitSuccess(false);
-    }, 2000);
+    // Map local dynamic parameters to parameters configured in your dashboard template
+    const templateParams = {
+      from_name: formData.name,
+      reply_to: formData.email,
+      message_details: formData.message || "No specific details provided.",
+    };
+
+    try {
+      await emailjs.send(
+        "service_j8fez0s",
+        "template_ott1fxw",
+        templateParams,
+        "CbN2DrkluPqVc_9iF",
+      );
+
+      setSubmitSuccess(true);
+      setFormData({ name: "", email: "", message: "" });
+
+      // Automatically dismiss modal shortly after completion notice
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setSubmitSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error("EmailJS Error inside SalesSection Form:", error);
+      setErrors({
+        global: "Failed to dispatch request. Please try again later.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -120,7 +148,6 @@ const SalesSection = () => {
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
               eiusmod tempor incididunt ut labore et dolore magna aliqua.
             </p>
-            {/* Added modal toggle on click */}
             <button
               onClick={() => setIsModalOpen(true)}
               className="w-full sm:w-auto bg-black text-white px-8 py-3 rounded-xl font-semibold hover:bg-[#FF2020] transition-colors duration-300 cursor-pointer text-center focus:outline-none"
@@ -239,7 +266,7 @@ const SalesSection = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => !isSubmitting && setIsModalOpen(false)}
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             />
 
@@ -262,7 +289,8 @@ const SalesSection = () => {
               {/* Close Icon Toggle */}
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors p-1 cursor-pointer"
+                disabled={isSubmitting}
+                className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors p-1 cursor-pointer disabled:opacity-50"
                 aria-label="Close modal"
               >
                 <svg
@@ -306,6 +334,13 @@ const SalesSection = () => {
                   className="space-y-4"
                   noValidate
                 >
+                  {/* Dynamic layout container for asynchronous error tracking */}
+                  {errors.global && (
+                    <div className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl">
+                      ✕ {errors.global}
+                    </div>
+                  )}
+
                   <div>
                     <label
                       htmlFor="sales-modal-name"
@@ -317,9 +352,14 @@ const SalesSection = () => {
                       type="text"
                       id="sales-modal-name"
                       name="name"
+                      disabled={isSubmitting}
                       value={formData.name}
                       onChange={handleInputChange}
-                      className={`w-full p-3 border rounded-xl text-sm outline-none transition-all ${errors.name ? "border-red-500 bg-red-50/20" : "border-gray-200 focus:border-gray-400"}`}
+                      className={`w-full p-3 border rounded-xl text-sm outline-none transition-all ${
+                        errors.name
+                          ? "border-red-500 bg-red-50/20"
+                          : "border-gray-200 focus:border-gray-400"
+                      } disabled:opacity-60`}
                     />
                     {errors.name && (
                       <p className="text-red-500 text-xs mt-1">{errors.name}</p>
@@ -337,9 +377,14 @@ const SalesSection = () => {
                       type="email"
                       id="sales-modal-email"
                       name="email"
+                      disabled={isSubmitting}
                       value={formData.email}
                       onChange={handleInputChange}
-                      className={`w-full p-3 border rounded-xl text-sm outline-none transition-all ${errors.email ? "border-red-500 bg-red-50/20" : "border-gray-200 focus:border-gray-400"}`}
+                      className={`w-full p-3 border rounded-xl text-sm outline-none transition-all ${
+                        errors.email
+                          ? "border-red-500 bg-red-50/20"
+                          : "border-gray-200 focus:border-gray-400"
+                      } disabled:opacity-60`}
                     />
                     {errors.email && (
                       <p className="text-red-500 text-xs mt-1">
@@ -359,9 +404,10 @@ const SalesSection = () => {
                       id="sales-modal-message"
                       name="message"
                       rows="3"
+                      disabled={isSubmitting}
                       value={formData.message}
                       onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-400 resize-none transition-all"
+                      className="w-full p-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-gray-400 resize-none transition-all disabled:opacity-60"
                     />
                   </div>
 
