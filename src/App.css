@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* 1. Import Space Grotesk from Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap");
+
+/* 2. Configure Tailwind v4 Theme Configuration */
+@theme {
+  --font-sans: "Space Grotesk", sans-serif;
+}
+
+/* 3. Global CSS Adjustments */
 html {
   scroll-behavior: smooth;
 }
@@ -15,5 +24,10 @@ body {
   overflow-x: hidden;
   margin: 0;
   padding: 0;
-  background-color: #000000; /* Keeps layout color consistent if elements shift */
+  background-color: #000000;
+
+  /* Apply the new font family and standard rendering helpers */
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
