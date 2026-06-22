@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Added useEffect
 import { X } from "lucide-react";
-import emailjs from "@emailjs/browser"; // Make sure to keep this imported
+import emailjs from "@emailjs/browser";
 import HeroImg from "../assets/images/Hero BG.webp";
 import Button from "./Button";
 import Women from "../assets/images/women.png";
@@ -20,6 +20,12 @@ const HeroSection = () => {
   // Submission Status States
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null); // 'success' | 'error' | null
+
+  // CRITICAL FIX: Explicitly initialize EmailJS with your Public Key when the component mounts.
+  // This ensures production deployment handshakes resolve correctly without race conditions.
+  useEffect(() => {
+    emailjs.init("CbN2DrkluPqVc_9iF");
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -41,7 +47,7 @@ const HeroSection = () => {
     try {
       await emailjs.send(
         "service_j8fez0s",
-        "template_ott1fxw", // Note: If you want a different email layout for quotes than your newsletter, update this ID!
+        "template_ott1fxw",
         templateParams,
         "CbN2DrkluPqVc_9iF",
       );
@@ -120,7 +126,7 @@ const HeroSection = () => {
           {/* Dark Backdrop Shadow Layer */}
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
-            onClick={() => !isSubmitting && setIsModalOpen(false)} // Prevent closing background clicks while loading
+            onClick={() => !isSubmitting && setIsModalOpen(false)}
           />
 
           {/* Form Modal Box Wrapper */}

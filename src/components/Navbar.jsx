@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
-import emailjs from "@emailjs/browser"; // 1. Import EmailJS
+import emailjs from "@emailjs/browser";
 import Button from "./Button";
 import Container from "./Container";
 import logo from "../assets/images/Enshored Logo.webp";
@@ -18,6 +18,12 @@ const Navbar = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
 
+  // CRITICAL FIX: Explicitly initialize EmailJS with your Public Key when the component mounts.
+  // This ensures production environments like Netlify register the SDK setup properly.
+  useEffect(() => {
+    emailjs.init("CbN2DrkluPqVc_9iF");
+  }, []);
+
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
@@ -27,13 +33,11 @@ const Navbar = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 2. Updated Form Submit Handler with EmailJS
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
 
-    // Dynamic key mapping based on what your EmailJS Template expects
     const templateParams = {
       from_name: formData.name,
       reply_to: formData.email,
@@ -41,24 +45,25 @@ const Navbar = () => {
     };
 
     try {
-      // Send the email using your credentials
+      // Send the email using your specific credentials
       await emailjs.send(
-        "service_j8fez0s", // Replace with your EmailJS Service ID
-        "template_ott1fxw", // Replace with your EmailJS Template ID
+        "service_j8fez0s",
+        "template_ott1fxw",
         templateParams,
-        "CbN2DrkluPqVc_9iF", // Replace with your EmailJS Public Key
+        "CbN2DrkluPqVc_9iF",
       );
 
       setSubmitStatus("success");
       setFormData({ name: "", email: "", message: "" }); // Clear input data
 
-      // Close the modal smoothly after a success message
+      // Close the modal smoothly after showing the success message
       setTimeout(() => {
         setIsModalOpen(false);
         setSubmitStatus(null);
       }, 2000);
     } catch (error) {
-      console.error("EmailJS Error:", error);
+      // Logs exact production API errors directly into your Netlify browser inspection tool
+      console.error("EmailJS Production Error Context:", error);
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Added useEffect import
 import { motion, AnimatePresence } from "framer-motion";
-import emailjs from "@emailjs/browser"; // Integrated EmailJS SDK
+import emailjs from "@emailjs/browser";
 import aboutImg from "../assets/images/About Us.webp";
 
 const AboutSection = () => {
@@ -16,6 +16,12 @@ const AboutSection = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // CRITICAL FIX: Explicitly initialize EmailJS with your Public Key when the component mounts.
+  // This registers the public credentials globally within the browser runtime environment.
+  useEffect(() => {
+    emailjs.init("CbN2DrkluPqVc_9iF");
+  }, []);
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 

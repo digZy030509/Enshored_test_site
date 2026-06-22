@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import emailjs from "@emailjs/browser"; // Integrated EmailJS SDK
+import emailjs from "@emailjs/browser";
 import ImgSection from "../assets/images/Sales & Installation.webp";
 import SalesImg1 from "../assets/images/Sales & Installation - Icon 1.webp";
 import SalesImg2 from "../assets/images/Sales & Installation - Icon 2.webp";
@@ -20,6 +20,11 @@ const SalesSection = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // CRITICAL FIX: Explicitly initialize EmailJS with your Public Key when the component mounts.
+  useEffect(() => {
+    emailjs.init("CbN2DrkluPqVc_9iF");
+  }, []);
 
   // Check if we are on mobile to toggle animation styles dynamically
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;

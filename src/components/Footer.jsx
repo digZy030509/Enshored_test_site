@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Added useEffect
 import emailjs from "@emailjs/browser";
 import FacebookIcon from "../assets/images/Facebook Icon.webp";
 import InstagramIcon from "../assets/images/Instagram Icon.webp";
@@ -6,6 +6,12 @@ import InstagramIcon from "../assets/images/Instagram Icon.webp";
 const Footer = () => {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [subscribeStatus, setSubscribeStatus] = useState(null); // 'success' | 'error' | 'loading' | null
+
+  // CRITICAL FIX: Explicitly initialize EmailJS with your Public Key when the component mounts.
+  // This guarantees that production deployments cleanly pass handshake tokens to the API.
+  useEffect(() => {
+    emailjs.init("CbN2DrkluPqVc_9iF");
+  }, []);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -37,7 +43,8 @@ const Footer = () => {
       setNewsletterEmail("");
       setSubscribeStatus("success");
     } catch (error) {
-      console.error("EmailJS Error:", error);
+      // Logs exact production API errors directly into your browser inspection tools
+      console.error("EmailJS Footer Production Error Context:", error);
       setSubscribeStatus("error");
     }
   };
