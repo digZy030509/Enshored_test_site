@@ -155,7 +155,7 @@ const AboutSection = () => {
                 Lorem ipsum dolor sit amet
               </p>
             </div>
-            <div className="border-l-2 border-t-2 border-r-2 border-b-2 border-gray-500/20 p-4 sm:p-6">
+            <div className="border-l-2 border-t-2 border-t-2 border-r-2 border-b-2 border-gray-500/20 p-4 sm:p-6">
               <h3 className="text-[#FF2020] font-bold text-3xl sm:text-4xl">
                 100%
               </h3>
@@ -163,7 +163,7 @@ const AboutSection = () => {
                 Lorem ipsum dolor sit amet
               </p>
             </div>
-            <div className="border-r-2 border-b-2 border-gray-500/20 p-4 sm:p-6">
+            <div className="border-r-2 border-t-2 border-b-2 border-gray-500/20 p-4 sm:p-6">
               <h3 className="text-[#FF2020] font-bold text-3xl sm:text-4xl">
                 14
               </h3>
