@@ -1,12 +1,9 @@
 import { useState, useEffect, useRef } from "react"; // Added useRef
-import { X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import emailjs from "@emailjs/browser";
-import HeroImg from "../assets/images/Hero BG.webp";
-import Button from "./Button";
-import Women from "../assets/images/women.png";
-import Accredited from "../assets/images/business.png";
+import aboutImg from "../assets/images/About Us.webp";
 
-const HeroSection = () => {
+const AboutSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const formRef = useRef(); // Create the DOM reference pointer
 
@@ -15,192 +12,252 @@ const HeroSection = () => {
     email: "",
     message: "",
   });
-
+  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
     emailjs.init("CbN2DrkluPqVc_9iF");
   }, []);
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+  const imageVariants = {
+    hidden: { opacity: 0, x: isMobile ? 0 : -40 },
+    visible: { opacity: 1, x: 0 },
+  };
+
+  const textVariants = {
+    hidden: { opacity: 0, y: isMobile ? 0 : 30 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    const currentErrors = {};
+
+    if (!formData.name.trim()) currentErrors.name = "Name is required";
+    if (!formData.email.trim()) {
+      currentErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      currentErrors.email = "Please enter a valid email address";
+    }
+
+    if (Object.keys(currentErrors).length > 0) {
+      setErrors(currentErrors);
+      return;
+    }
+
     setIsSubmitting(true);
-    setSubmitStatus(null);
 
     try {
       // FIX: Changed from .send() to .sendForm() and passed formRef.current
       await emailjs.sendForm(
         "service_j8fez0s",
         "template_ott1fxw",
-        formRef.current, // Targets the absolute DOM element safely
+        formRef.current, // Direct element reference avoids live URL routing errors
         "CbN2DrkluPqVc_9iF",
       );
 
-      setSubmitStatus("success");
+      setSubmitSuccess(true);
       setFormData({ name: "", email: "", message: "" });
 
       setTimeout(() => {
         setIsModalOpen(false);
-        setSubmitStatus(null);
+        setSubmitSuccess(false);
       }, 2000);
     } catch (error) {
-      console.error("EmailJS Form Error:", error);
-      setSubmitStatus("error");
+      console.error("EmailJS Production System Error:", error);
+      setErrors({ global: "Deployment configuration fault. Try again later." });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden">
-      <img
-        src={HeroImg}
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      <div className="absolute inset-0 bg-black/60" />
+    <section className="w-full overflow-hidden bg-white">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 px-6 py-12 sm:px-12 lg:px-24 lg:py-20 max-w-7xl mx-auto">
+        <motion.div
+          className="w-full lg:w-1/2"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.15 }}
+          variants={imageVariants}
+          transition={{ duration: 0.6 }}
+        >
+          <img
+            src={aboutImg}
+            alt="About Us"
+            className="w-full h-full object-cover rounded-2xl shadow-sm object-top"
+          />
+        </motion.div>
 
-      <div className="relative z-10 min-h-screen flex items-center justify-center pt-24 pb-24 mt-[150px] ">
-        <div className="max-w-5xl text-center px-6 mx-auto">
-          <h1 className="text-white font-bold leading-tight text-4xl sm:text-5xl md:text-6xl lg:text-8xl">
-            Lorem ipsum
-          </h1>
-          <h2 className="text-[#FF2020] font-bold leading-tight mt-2 sm:mt-4 text-4xl sm:text-5xl md:text-6xl lg:text-8xl">
-            dolor sit amet
+        <motion.div
+          className="w-full lg:w-1/2 flex flex-col justify-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          variants={textVariants}
+          transition={{ duration: 0.5, delay: isMobile ? 0 : 0.15 }}
+        >
+          <h2 className="text-sm sm:text-lg font-bold mb-3 text-gray-500 uppercase tracking-wider">
+            About Us
           </h2>
-          <p className="mt-6 sm:mt-8 text-white/90 text-base sm:text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-          </p>
+          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-6 text-gray-900 leading-tight">
+            Lorem ipsum dolor sit amet
+          </h1>
 
-          <div
-            className="mt-8 sm:mt-10 inline-block"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <Button>Get A Quote</Button>
+          <div className="mt-8 lg:mt-12">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="w-full sm:w-auto bg-black text-white px-8 py-3 rounded-xl font-semibold hover:bg-[#FF2020] transition-colors cursor-pointer"
+            >
+              Learn More About Us →
+            </button>
           </div>
-
-          <div className="flex flex-wrap items-center justify-center mt-10 gap-4 sm:gap-6">
-            <img
-              src={Accredited}
-              alt="Accredited"
-              className="h-10 sm:h-14 w-auto object-contain rounded-xl sm:rounded-2xl"
-            />
-            <img
-              src={Women}
-              alt="Women"
-              className="h-10 sm:h-14 w-auto object-contain rounded-xl sm:rounded-2xl"
-            />
-          </div>
-        </div>
+        </motion.div>
       </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => !isSubmitting && setIsModalOpen(false)}
-          />
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isSubmitting && setIsModalOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
 
-          <div className="relative w-full max-w-md bg-white rounded-2xl p-6 sm:p-8 shadow-2xl z-10 border border-gray-100">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              disabled={isSubmitting}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1"
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: isMobile ? 1 : 0.9,
+                y: isMobile ? 20 : 0,
+              }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{
+                opacity: 0,
+                scale: isMobile ? 1 : 0.9,
+                y: isMobile ? 20 : 0,
+              }}
+              className="bg-white w-full max-w-lg rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10"
             >
-              <X size={24} />
-            </button>
-
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
-              Request a Quote
-            </h3>
-            <p className="text-gray-500 text-sm mb-6">
-              Fill out the form below and our team will get back to you shortly.
-            </p>
-
-            {/* ADDED formRef pointer hook here */}
-            <form
-              ref={formRef}
-              onSubmit={handleFormSubmit}
-              className="space-y-4"
-            >
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  required
-                  disabled={isSubmitting}
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="John Doe"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  disabled={isSubmitting}
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="johndoe@example.com"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-                  Message / Details
-                </label>
-                <textarea
-                  name="message"
-                  required
-                  rows="4"
-                  disabled={isSubmitting}
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  placeholder="Project details..."
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm resize-none"
-                />
-              </div>
-
-              {submitStatus === "success" && (
-                <div className="p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl">
-                  ✓ Form submitted successfully!
-                </div>
-              )}
-              {submitStatus === "error" && (
-                <div className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl">
-                  ✕ Production Connection Failed. Try again.
-                </div>
-              )}
-
               <button
-                type="submit"
-                disabled={isSubmitting || submitStatus === "success"}
-                className="w-full bg-[#FF2020] hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-xl text-sm cursor-pointer disabled:bg-gray-400"
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-black"
               >
-                {isSubmitting ? "Sending Request..." : "Submit Request"}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
               </button>
-            </form>
+
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Get In Touch
+              </h3>
+
+              {submitSuccess ? (
+                <div className="py-8 text-center space-y-3">
+                  <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+                    ✓
+                  </div>
+                  <h4 className="text-lg font-bold text-gray-900">
+                    Request Submitted!
+                  </h4>
+                </div>
+              ) : (
+                /* ADDED formRef pointer hook here */
+                <form
+                  ref={formRef}
+                  onSubmit={handleFormSubmit}
+                  className="space-y-4"
+                  noValidate
+                >
+                  {errors.global && (
+                    <div className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl">
+                      ✕ {errors.global}
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-gray-700 text-sm font-medium mb-1.5">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      disabled={isSubmitting}
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full p-3 border border-gray-200 rounded-xl text-sm"
+                    />
+                    {errors.name && (
+                      <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700 text-sm font-medium mb-1.5">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      disabled={isSubmitting}
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full p-3 border border-gray-200 rounded-xl text-sm"
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.email}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700 text-sm font-medium mb-1.5">
+                      Message
+                    </label>
+                    <textarea
+                      name="message"
+                      rows="3"
+                      disabled={isSubmitting}
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      className="w-full p-3 border border-gray-200 rounded-xl text-sm resize-none"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#FF2020] hover:bg-black text-white py-3 px-6 rounded-xl font-bold transition-all cursor-pointer"
+                  >
+                    {isSubmitting ? "Processing..." : "Submit Request"}
+                  </button>
+                </form>
+              )}
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </section>
   );
 };
 
-export default HeroSection;
+export default AboutSection;
